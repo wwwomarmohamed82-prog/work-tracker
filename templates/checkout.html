@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Work Log</title>
+  <title>Check Out</title>
   <style>
     :root {
       color-scheme: dark;
@@ -15,7 +15,6 @@
       --muted: #95a0b7;
       --accent: #5b8cff;
       --accent-strong: #72a8ff;
-      --danger: #f76d6d;
       --shadow: 0 25px 70px rgba(0, 0, 0, 0.25);
       font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
@@ -35,11 +34,11 @@
     }
 
     .page {
-      width: min(520px, calc(100vw - 32px));
+      width: min(540px, calc(100vw - 32px));
       padding: 32px;
       background: linear-gradient(180deg, rgba(14, 24, 36, 0.95), rgba(10, 18, 28, 0.95));
       border: 1px solid var(--border);
-      border-radius: 24px;
+      border-radius: 28px;
       box-shadow: var(--shadow);
     }
 
@@ -49,7 +48,7 @@
 
     .page header h1 {
       margin: 0 0 8px;
-      font-size: clamp(1.75rem, 2.6vw, 2.3rem);
+      font-size: clamp(1.85rem, 2.6vw, 2.5rem);
       letter-spacing: -0.03em;
     }
 
@@ -59,14 +58,14 @@
       line-height: 1.65;
     }
 
-    form {
+    .section {
       display: grid;
       gap: 18px;
     }
 
     .field {
       display: grid;
-      gap: 8px;
+      gap: 10px;
     }
 
     label {
@@ -95,19 +94,7 @@
       background: rgba(91, 140, 255, 0.08);
     }
 
-    .row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .submit-row {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 4px;
-    }
-
-    .section {
+    .panel {
       padding: 24px;
       border-radius: 24px;
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -115,46 +102,36 @@
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
     }
 
-    .section + .section {
-      margin-top: 18px;
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 1.1rem;
     }
 
-    .section-header {
+    .summary-row {
       display: flex;
-      align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 18px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .section-header h2 {
-      margin: 0;
-      font-size: 1.05rem;
-      letter-spacing: -0.02em;
+    .summary-row:last-child {
+      border-bottom: none;
     }
 
-    .section-header p {
-      margin: 0;
+    .summary-label {
       color: var(--muted);
-      font-size: 0.94rem;
+      font-size: 0.95rem;
     }
 
-    .flash-message {
-      padding: 16px 20px;
-      border-radius: 18px;
-      background: rgba(40, 72, 107, 0.18);
-      border: 1px solid rgba(91, 140, 255, 0.2);
-      color: #d7e7ff;
-      margin-bottom: 18px;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+    .summary-value {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .submit-row {
       display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .flash-message.success {
-      background: rgba(56, 102, 180, 0.22);
-      border-color: rgba(91, 140, 255, 0.3);
+      justify-content: flex-end;
     }
 
     input[type="submit"] {
@@ -175,22 +152,33 @@
       box-shadow: 0 18px 38px rgba(91, 140, 255, 0.28);
     }
 
-    input[type="submit"]:disabled {
-      opacity: 0.65;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+    .flash-message {
+      padding: 16px 20px;
+      border-radius: 18px;
+      background: rgba(40, 72, 107, 0.18);
+      border: 1px solid rgba(91, 140, 255, 0.2);
+      color: #d7e7ff;
+      margin-bottom: 18px;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .flash-message.success {
+      background: rgba(56, 102, 180, 0.22);
+      border-color: rgba(91, 140, 255, 0.3);
     }
 
     .hint {
       color: var(--muted);
-      font-size: 0.92rem;
-      margin-top: -6px;
+      font-size: 0.95rem;
+      line-height: 1.6;
     }
 
     @media (max-width: 520px) {
-      .row {
-        grid-template-columns: 1fr;
+      .page {
+        padding: 24px;
       }
     }
   </style>
@@ -198,8 +186,8 @@
 <body>
   <main class="page">
     <header>
-      <h1>Work Log Reminder</h1>
-      <p>Enter your shift dates and times below.</p>
+      <h1>Check Out</h1>
+      <p>Finish your shift and review your summary.</p>
     </header>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -210,72 +198,44 @@
       {% endif %}
     {% endwith %}
 
-    <form class="section" action="/checkin" method="post">
-      <div class="section-header">
-        <div>
-          <h2>Check In</h2>
-          <p>Record your shift start and expected end time.</p>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="field">
-          <label for="checkinDate">Date</label>
-          <input type="date" id="checkinDate" name="checkin_date">
-        </div>
-
-        <div class="field">
-          <label for="checkinStart">Start time</label>
-          <input type="time" id="checkinStart" name="start_time">
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="checkinExpected">Expected end time</label>
-        <input type="time" id="checkinExpected" name="expected_end_time">
-      </div>
-
-      <div class="submit-row">
-        <input type="submit" value="Check In">
-      </div>
-    </form>
-
-    <form class="section" action="/checkout" method="post">
-      <div class="section-header">
-        <div>
-          <h2>Check Out</h2>
-          <p>Record your actual check-out time.</p>
-        </div>
-      </div>
+    <form class="panel" action="/checkout" method="post">
+      <h2>Check Out</h2>
 
       <div class="field">
         <label for="checkoutDate">Date</label>
-        <input type="date" id="checkoutDate" name="checkout_date">
+        <input type="date" id="checkoutDate" name="checkout_date" required>
       </div>
 
       <div class="field">
         <label for="checkoutTime">Actual check-out time</label>
-        <input type="time" id="checkoutTime" name="checkout_time">
+        <input type="time" id="checkoutTime" name="checkout_time" required>
       </div>
 
       <div class="submit-row">
         <input type="submit" value="Check Out">
       </div>
     </form>
+
+    <section class="panel" style="margin-top: 18px;">
+      <h2>Summary</h2>
+      {% if hours_worked or overtime %}
+        <div class="summary-row">
+          <div class="summary-label">Hours worked</div>
+          <div class="summary-value">{{ hours_worked or '—' }}</div>
+        </div>
+        <div class="summary-row">
+          <div class="summary-label">Overtime</div>
+          <div class="summary-value">{{ overtime or '—' }}</div>
+        </div>
+      {% else %}
+        <p class="hint">Submit your check-out time to see hours worked and overtime status here.</p>
+      {% endif %}
+    </section>
   </main>
 
   <script>
     const today = new Date().toISOString().slice(0, 10);
-    document.getElementById('checkinDate').value = today;
     document.getElementById('checkoutDate').value = today;
-
-    document.querySelectorAll('form').forEach(form => {
-      const submitBtn = form.querySelector('input[type="submit"]');
-      form.addEventListener('submit', () => {
-        submitBtn.value = submitBtn.value + '...';
-        submitBtn.disabled = true;
-      });
-    });
   </script>
 </body>
 </html>
